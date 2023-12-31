@@ -201,12 +201,121 @@ public class BlockchainV1 {
     }
 
     private void searchForProduct() {
-        // Implementation to search for a product
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Search by: ");
+        System.out.println("1. Block ID");
+        System.out.println("2. Title");
+        System.out.println("3. Price");
+        System.out.println("4. Category");
+        System.out.print("Enter your choice: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        String field = "";
+        switch (choice) {
+            case 1:
+                field = "block_id";
+                break;
+            case 2:
+                field = "title";
+                break;
+            case 3:
+                field = "price";
+                break;
+            case 4:
+                field = "category";
+                break;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+                return;
+        }
+
+        System.out.print("Enter the value to search for: ");
+        String value = scanner.nextLine();
+
+        System.out.println("Do you want to view:");
+        System.out.println("1. First appearance");
+        System.out.println("2. Last appearance");
+        System.out.println("3. All appearances");
+        System.out.print("Enter your choice: ");
+        int appearanceChoice = scanner.nextInt();
+        scanner.nextLine();
+
+        String query = constructSearchQuery(field, appearanceChoice);
+        executeSearchQuery(query, value);
+    }
+
+    private String constructSearchQuery(String field, int appearanceChoice) {
+        String baseQuery = "SELECT * FROM blocks WHERE " + field + " = ?";
+        if (appearanceChoice == 1) {
+            baseQuery += " ORDER BY registration_number ASC LIMIT 1";
+        } else if (appearanceChoice == 2) {
+            baseQuery += " ORDER BY registration_number DESC LIMIT 1";
+        }
+        return baseQuery;
+    }
+
+    private void executeSearchQuery(String query, String value) {
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, value);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (!rs.isBeforeFirst()) { // Check if the ResultSet is empty
+                System.out.println("No blocks found with the specified criteria.");
+                return;
+            }
+
+            while (rs.next()) {
+                // Display each block's details
+                System.out.println("Registration Number: " + rs.getInt("registration_number"));
+                System.out.println("Block ID: " + rs.getString("block_id"));
+                System.out.println("Title: " + rs.getString("title"));
+                System.out.println("Timestamp: " + rs.getLong("timestamp"));
+                System.out.println("Price: " + rs.getDouble("price"));
+                System.out.println("Description: " + rs.getString("description"));
+                System.out.println("Category: " + rs.getString("category"));
+                System.out.println("Previous Hash: " + rs.getString("previous_hash"));
+                System.out.println("Hash: " + rs.getString("hash"));
+                System.out.println("------------------------------------");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error executing search query: " + e.getMessage());
+        }
     }
 
     private void viewProductStatistics() {
-        // Implementation to view statistics of a product
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the block ID to view its price statistics: ");
+        String blockId = scanner.nextLine();
+
+        String query = "SELECT price, timestamp FROM blocks WHERE block_id = ? ORDER BY timestamp ASC";
+        executeStatisticsQuery(query, blockId);
     }
+
+    private void executeStatisticsQuery(String query, String blockId) {
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, blockId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (!rs.isBeforeFirst()) {
+                System.out.println("No records found for the block ID: " + blockId);
+                return;
+            }
+
+            System.out.println("Price Statistics for Block ID: " + blockId);
+            while (rs.next()) {
+                double price = rs.getDouble("price");
+                long timestamp = rs.getLong("timestamp");
+                String formattedDate = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date(timestamp));
+                System.out.println("Date: " + formattedDate + ", Price: " + price);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error executing statistics query: " + e.getMessage());
+        }
+    }
+
 
     public static void main(String[] args) {
         BlockchainV1 app = new BlockchainV1();
