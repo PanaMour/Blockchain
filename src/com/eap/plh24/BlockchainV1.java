@@ -316,9 +316,22 @@ public class BlockchainV1 {
         }
     }
 
+    public void closeConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error closing the database connection: " + e.getMessage());
+        }
+    }
 
     public static void main(String[] args) {
         BlockchainV1 app = new BlockchainV1();
-        app.showMenu();
+        try {
+            app.showMenu();
+        } finally {
+            app.closeConnection();
+        }
     }
 }
