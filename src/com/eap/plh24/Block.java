@@ -52,14 +52,13 @@ public class Block {
         return builder.toString();
     }
 
-    public void mineBlock(int prefix) {
-        long startTime = System.currentTimeMillis();
+    public String mineBlock(int prefix) {
         String prefixString = new String(new char[prefix]).replace('\0', '0');
-        while (!hash.substring(0, prefix).equals(prefixString) &&
-                System.currentTimeMillis() - startTime < 60000) { // 60,000 milliseconds = 1 minute
+        while (!hash.substring(0, prefix).equals(prefixString)) {
             nonce++;
             hash = calculateBlockHash();
         }
+        return hash;
     }
 
     // Getters and setters for the fields

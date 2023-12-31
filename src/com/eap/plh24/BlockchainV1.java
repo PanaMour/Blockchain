@@ -133,7 +133,7 @@ public class BlockchainV1 {
             long timeStamp = System.currentTimeMillis();
             Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
 
-            newBlock.mineBlock(1);
+            mineBlock(newBlock);
             insertBlockIntoDatabase(newBlock);
 
         } catch (SQLException e) {
@@ -150,6 +150,13 @@ public class BlockchainV1 {
             } else {
                 return "0"; // If no previous block, return "0" as the previous hash
             }
+        }
+    }
+
+    private void mineBlock(Block block) {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < 60000) { // 60,000 milliseconds = 1 minute
+            block.mineBlock(1);
         }
     }
 
