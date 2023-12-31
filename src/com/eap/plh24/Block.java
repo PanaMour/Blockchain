@@ -1,79 +1,97 @@
 package com.eap.plh24;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.io.UnsupportedEncodingException;
 
 public class Block {
-    private List<Product> products;
+    private String hash;
     private String previousHash;
-    private String blockHash;
-    private long timestamp;
-    private int nonce;
+    private String blockId; // Block ID
+    private String title; // Block title
+    private long timeStamp; // Timestamp for block creation
+    private double price; // Price of the block
+    private String description; // Description of the block
+    private String category; // Category of the block
+    private int nonce; // Nonce used in mining
 
-    public Block(String previousHash) {
-        this.products = new ArrayList<>();
+    public Block(String blockId, String title, long timeStamp,
+                 double price, String description, String category,
+                 String previousHash) {
+        this.blockId = blockId;
+        this.title = title;
+        this.price = price;
+        this.description = description;
+        this.category = category;
         this.previousHash = previousHash;
-        this.timestamp = System.currentTimeMillis();
-        this.nonce = 0;
-        this.blockHash = calculateBlockHash();
+        this.timeStamp = timeStamp;
+        this.hash = calculateBlockHash();
     }
 
-    public void addProduct(Product product) {
-        product.setRegistrationNumber(products.size() + 1);
-        product.setPreviousRegistrationNumber(products.isEmpty() ? -1 : products.size());
-        products.add(product);
-        this.blockHash = mineBlock(4); // Update block hash after adding a product
-    }
-
-    private String calculateBlockHash() {
-        StringBuilder dataToHash = new StringBuilder();
-        dataToHash.append(previousHash)
-                .append(String.valueOf(timestamp));
-
-        for (Product product : products) {
-            dataToHash.append(product.toString());
-        }
-
-        dataToHash.append(String.valueOf(nonce));
-
+    public String calculateBlockHash() {
+        String dataToHash = previousHash
+                + blockId
+                + title
+                + Double.toString(price)
+                + description
+                + category
+                + Long.toString(timeStamp)
+                + Integer.toString(nonce);
+        MessageDigest digest = null;
+        byte[] bytes = null;
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] bytes = digest.digest(dataToHash.toString().getBytes("UTF-8"));
-            StringBuilder builder = new StringBuilder();
-            for (byte b : bytes) {
-                builder.append(String.format("%02x", b));
-            }
-            return builder.toString();
+            digest = MessageDigest.getInstance("SHA-256");
+            bytes = digest.digest(dataToHash.getBytes("UTF-8"));
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String mineBlock(int prefix) {
-        String prefixString = new String(new char[prefix]).replace('\0', '0');
-        while (!blockHash.substring(0, prefix).equals(prefixString)) {
-            nonce++;
-            blockHash = calculateBlockHash();
+        StringBuilder builder = new StringBuilder();
+        for (byte b : bytes) {
+            builder.append(String.format("%02x", b));
         }
-        return blockHash;
+        return builder.toString();
     }
 
-    public String getBlockHash() {
-        return blockHash;
+    public void mineBlock(int prefix) {
+        long startTime = System.currentTimeMillis();
+        String prefixString = new String(new char[prefix]).replace('\0', '0');
+        while (!hash.substring(0, prefix).equals(prefixString) &&
+                System.currentTimeMillis() - startTime < 60000) { // 60,000 milliseconds = 1 minute
+            nonce++;
+            hash = calculateBlockHash();
+        }
+    }
+
+    // Getters and setters for the fields
+    public String getHash() {
+        return hash;
     }
 
     public String getPreviousHash() {
         return previousHash;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public String getBlockId() {
+        return blockId;
     }
 
-    public List<Product> getProducts() {
-        return products;
+    public String getTitle() {
+        return title;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getCategory() {
+        return category;
     }
 }
