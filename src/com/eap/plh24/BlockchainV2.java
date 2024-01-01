@@ -3,11 +3,12 @@ package com.eap.plh24;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.sql.*;
+import java.util.concurrent.*;
 
-public class BlockchainV1 {
+public class BlockchainV2 {
     private Connection connection;
 
-    public BlockchainV1() {
+    public BlockchainV2() {
         try {
             String url = "jdbc:sqlite:blockchain.db";
             this.connection = DriverManager.getConnection(url);
@@ -35,7 +36,7 @@ public class BlockchainV1 {
         }
     }
 
-    public void showMenu() {
+    public void showMenu() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         int choice;
 
@@ -133,7 +134,7 @@ public class BlockchainV1 {
             long timeStamp = System.currentTimeMillis();
             Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
 
-            newBlock.mineBlock(1);
+            mineBlockConcurrently(newBlock);
             insertBlockIntoDatabase(newBlock);
 
         } catch (SQLException e) {
@@ -153,6 +154,20 @@ public class BlockchainV1 {
         }
     }
 
+    private ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+    private void mineBlockConcurrently(Block block) {
+        Callable<String> miningTask = () -> block.mineBlock(1);
+
+        Future<String> futureHash = executorService.submit(miningTask);
+        try {
+            String blockHash = futureHash.get(60, TimeUnit.SECONDS);
+            block.setHash(blockHash);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            System.out.println("Mining interrupted or timed out: " + e.getMessage());
+        }
+    }
+
     private void insertBlockIntoDatabase(Block block) throws SQLException {
         String insertSQL = "INSERT INTO blocks (block_id, title, timestamp, price, description, category, previous_hash, hash) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -168,28 +183,59 @@ public class BlockchainV1 {
             pstmt.executeUpdate();
         }
     }
-
-    private void addMultipleProducts() {
+    private void addMultipleProducts() throws SQLException {
         Scanner scanner = new Scanner(System.in);
-
         System.out.print("How many products do you want to add? ");
-        int numberOfProducts = 0;
-        while (numberOfProducts <= 0) {
-            try {
-                numberOfProducts = scanner.nextInt();
-                if (numberOfProducts <= 0) {
-                    System.out.println("Please enter a positive number.");
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a numeric value.");
-                scanner.nextLine();
-            }
-        }
+        int numberOfProducts = scanner.nextInt();
         scanner.nextLine();
 
         for (int i = 0; i < numberOfProducts; i++) {
             System.out.println("Entering details for product " + (i + 1) + ":");
-            addProduct(); // Call addProduct method to handle each product addition
+
+            // Collect product details for each product
+            System.out.print("Enter block ID: ");
+            String blockId = scanner.nextLine();
+
+            System.out.print("Enter block title: ");
+            String title = scanner.nextLine();
+
+            System.out.print("Enter block price: ");
+            double price = scanner.nextDouble();
+            scanner.nextLine();
+
+            System.out.print("Enter block description: ");
+            String description = scanner.nextLine();
+
+            System.out.print("Enter block category: ");
+            String category = scanner.nextLine();
+
+            String previousHash = getLastBlockHash();
+            long timeStamp = System.currentTimeMillis();
+            Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
+
+            // Submit each block to be mined and added to the database concurrently
+            executorService.submit(() -> {
+                mineBlockConcurrently(newBlock);
+                try {
+                    insertBlockIntoDatabase(newBlock);
+                    System.out.println("Product with ID " + newBlock.getBlockId() + " has been added to the database.");
+                } catch (SQLException e) {
+                    System.out.println("Error inserting block into database: " + e.getMessage());
+                }
+            });
+
+        }
+    }
+
+    public void closeApplication() {
+        closeConnection();
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) { // Wait for tasks to finish
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
         }
     }
 
@@ -320,11 +366,14 @@ public class BlockchainV1 {
     }
 
     public static void main(String[] args) {
-        BlockchainV1 app = new BlockchainV1();
+        BlockchainV2 app = new BlockchainV2();
         try {
             app.showMenu();
+        } catch (SQLException e) {
+            e.printStackTrace();
         } finally {
-            app.closeConnection();
+            app.closeApplication();
         }
     }
+
 }

@@ -53,19 +53,24 @@ public class Block {
     }
 
     public String mineBlock(int prefix) {
-        String prefixString = new String(new char[prefix]).replace('\0', '0');
-        while (!hash.substring(0, prefix).equals(prefixString)) {
+        long startTime = System.currentTimeMillis();
+        String target = new String(new char[prefix]).replace('\0', '0');
+
+        while (!hash.substring(0, prefix).equals(target) || System.currentTimeMillis() - startTime < 60000) {
             nonce++;
             hash = calculateBlockHash();
         }
+
         return hash;
     }
 
-    // Getters and setters for the fields
+
     public String getHash() {
         return hash;
     }
-
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
     public String getPreviousHash() {
         return previousHash;
     }
