@@ -319,6 +319,12 @@ public class BlockchainV1 {
         }
     }
 
+    public void simulateAddProduct() throws SQLException {
+        Block block = new Block("sampleId", "sampleTitle", System.currentTimeMillis(), 100.0, "sampleDescription", "sampleCategory", getLastBlockHash());
+        block.mineBlock(1);
+        insertBlockIntoDatabase(block);
+    }
+
     public static void main(String[] args) {
         BlockchainV1 app = new BlockchainV1();
         try {
