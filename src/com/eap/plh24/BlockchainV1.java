@@ -1,6 +1,7 @@
 package com.eap.plh24;
 
 import java.util.InputMismatchException;
+import java.util.Random;
 import java.util.Scanner;
 import java.sql.*;
 
@@ -192,6 +193,20 @@ public class BlockchainV1 {
             addProduct(); // Call addProduct method to handle each product addition
         }
     }
+    public void simulateAddMultipleProducts(int numberOfProducts) throws SQLException {
+        Random random = new Random();
+        for (int i = 0; i < numberOfProducts; i++) {
+            // Random data for each product
+            String blockId = "block" + (i + 1); // Sequential block ID
+            String title = "Product " + (i + 1);
+            double price = 100.0 + (random.nextDouble() * 100.0); // Random price between 100 and 200
+            String description = "Description for product " + (i + 1);
+            String category = "Category" + (i % 3); // Cycles through 3 categories
+
+            simulateAddProduct(title, category, description, price);
+        }
+    }
+
 
     private void searchForProduct() {
         Scanner scanner = new Scanner(System.in);
@@ -319,11 +334,21 @@ public class BlockchainV1 {
         }
     }
 
-    public void simulateAddProduct() throws SQLException {
-        Block block = new Block("sampleId", "sampleTitle", System.currentTimeMillis(), 100.0, "sampleDescription", "sampleCategory", getLastBlockHash());
-        block.mineBlock(1);
-        insertBlockIntoDatabase(block);
+    public void simulateAddProduct(String title, String category, String description, double price) throws SQLException {
+        String blockId = "Block" + Math.random();
+        String previousHash = getLastBlockHash();
+        long timeStamp = System.currentTimeMillis();
+
+        Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
+        newBlock.mineBlock(1);
+
+        try {
+            insertBlockIntoDatabase(newBlock);
+        } catch (SQLException e) {
+            System.out.println("Error while inserting the block into database: " + e.getMessage());
+        }
     }
+
 
     public static void main(String[] args) {
         BlockchainV1 app = new BlockchainV1();

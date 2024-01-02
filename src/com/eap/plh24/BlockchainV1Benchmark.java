@@ -19,8 +19,14 @@ public class BlockchainV1Benchmark {
 
     @Benchmark
     public void addProductBenchmark() throws SQLException {
-        blockchainV1.simulateAddProduct();
+        blockchainV1.simulateAddProduct("Apple", "Fruit", "Delicious red apple", 1.99);
     }
+
+    @Benchmark
+    public void addMultipleProductsBenchmark() throws SQLException {
+        blockchainV1.simulateAddMultipleProducts(5); // Example, adding 5 products
+    }
+
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
