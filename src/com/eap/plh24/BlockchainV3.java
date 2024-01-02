@@ -35,7 +35,7 @@ public class BlockchainV3 {
         }
     }
 
-    public void showMenu() {
+    public void showMenu() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         int choice;
 
@@ -153,7 +153,7 @@ public class BlockchainV3 {
         }
     }
 
-    private void insertBlockIntoDatabase(Block block) throws SQLException {
+    private synchronized void insertBlockIntoDatabase(Block block) throws SQLException {
         String insertSQL = "INSERT INTO blocks (block_id, title, timestamp, price, description, category, previous_hash, hash) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
@@ -169,7 +169,7 @@ public class BlockchainV3 {
         }
     }
 
-    private void addMultipleProducts() {
+    private void addMultipleProducts() throws SQLException {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("How many products do you want to add? ");
@@ -189,7 +189,35 @@ public class BlockchainV3 {
 
         for (int i = 0; i < numberOfProducts; i++) {
             System.out.println("Entering details for product " + (i + 1) + ":");
-            addProduct(); // Call addProduct method to handle each product addition
+
+            String blockId = scanner.nextLine();
+
+            System.out.print("Enter block title: ");
+            String title = scanner.nextLine();
+
+            System.out.print("Enter block price: ");
+            double price = scanner.nextDouble();
+            scanner.nextLine();
+
+            System.out.print("Enter block description: ");
+            String description = scanner.nextLine();
+
+            System.out.print("Enter block category: ");
+            String category = scanner.nextLine();
+
+            String previousHash = getLastBlockHash();
+            long timeStamp = System.currentTimeMillis();
+            Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
+
+            Thread thread = new Thread(() -> {
+                newBlock.mineBlock(1);
+                try {
+                    insertBlockIntoDatabase(newBlock);
+                } catch (SQLException e) {
+                    System.out.println("Error inserting block into database: " + e.getMessage());
+                }
+            });
+            thread.start();
         }
     }
 
@@ -323,6 +351,8 @@ public class BlockchainV3 {
         BlockchainV3 app = new BlockchainV3();
         try {
             app.showMenu();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         } finally {
             app.closeConnection();
         }
