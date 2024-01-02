@@ -134,8 +134,15 @@ public class BlockchainV2 {
             long timeStamp = System.currentTimeMillis();
             Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
 
-            mineBlockConcurrently(newBlock);
-            insertBlockIntoDatabase(newBlock);
+            executorService.submit(() -> {
+                mineBlockConcurrently(newBlock);
+                try {
+                    insertBlockIntoDatabase(newBlock);
+                    System.out.println("Product with ID " + newBlock.getBlockId() + " has been added to the database.");
+                } catch (SQLException e) {
+                    System.out.println("Error inserting block into database: " + e.getMessage());
+                }
+            });
 
         } catch (SQLException e) {
             System.out.println("Error adding product: " + e.getMessage());

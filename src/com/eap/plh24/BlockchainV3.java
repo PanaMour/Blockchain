@@ -133,8 +133,16 @@ public class BlockchainV3 {
             long timeStamp = System.currentTimeMillis();
             Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
 
-            newBlock.mineBlock(1);
-            insertBlockIntoDatabase(newBlock);
+            Thread thread = new Thread(() -> {
+                newBlock.mineBlock(1);
+                try {
+                    insertBlockIntoDatabase(newBlock);
+                    System.out.println("Product with ID " + newBlock.getBlockId() + " has been added to the database.");
+                } catch (SQLException e) {
+                    System.out.println("Error inserting block into database: " + e.getMessage());
+                }
+            });
+            thread.start();
 
         } catch (SQLException e) {
             System.out.println("Error adding product: " + e.getMessage());
@@ -190,6 +198,7 @@ public class BlockchainV3 {
         for (int i = 0; i < numberOfProducts; i++) {
             System.out.println("Entering details for product " + (i + 1) + ":");
 
+            System.out.print("Enter block ID: ");
             String blockId = scanner.nextLine();
 
             System.out.print("Enter block title: ");
@@ -213,6 +222,7 @@ public class BlockchainV3 {
                 newBlock.mineBlock(1);
                 try {
                     insertBlockIntoDatabase(newBlock);
+                    System.out.println("Product with ID " + newBlock.getBlockId() + " has been added to the database.");
                 } catch (SQLException e) {
                     System.out.println("Error inserting block into database: " + e.getMessage());
                 }
