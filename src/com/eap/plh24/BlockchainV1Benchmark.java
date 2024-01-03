@@ -7,8 +7,14 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
-@State(Scope.Thread)
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@State(Scope.Benchmark)
+@Fork(value = 2)
+@Warmup(iterations = 1)
+@Measurement(iterations = 4)
 public class BlockchainV1Benchmark {
     private BlockchainV1 blockchainV1;
 
@@ -24,7 +30,7 @@ public class BlockchainV1Benchmark {
 
     @Benchmark
     public void addMultipleProductsBenchmark() throws SQLException {
-        blockchainV1.simulateAddMultipleProducts(5); // Example, adding 5 products
+        blockchainV1.simulateAddMultipleProducts(5);
     }
 
 

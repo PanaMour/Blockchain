@@ -1,0 +1,10 @@
+dontinline,*.*_all_jmhStub
+dontinline,*.*_avgt_jmhStub
+dontinline,*.*_sample_jmhStub
+dontinline,*.*_ss_jmhStub
+dontinline,*.*_thrpt_jmhStub
+inline,com/eap/plh24/BlockchainV1Benchmark.addMultipleProductsBenchmark
+inline,com/eap/plh24/BlockchainV1Benchmark.addProductBenchmark
+inline,com/eap/plh24/BlockchainV1Benchmark.setUp
+inline,com/eap/plh24/BlockchainV2Benchmark.addMultipleProductsBenchmark
+inline,com/eap/plh24/BlockchainV2Benchmark.setUp

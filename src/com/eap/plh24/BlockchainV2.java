@@ -245,6 +245,47 @@ public class BlockchainV2 {
             executorService.shutdownNow();
         }
     }
+    public void simulateAddProduct(String title, String category, String description, double price) throws SQLException {
+        long timeStamp = System.currentTimeMillis();
+        String previousHash = getLastBlockHash();
+        String blockId = "Block" + Math.random();
+        Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
+
+        Callable<String> miningTask = () -> newBlock.mineBlock(1);
+        Future<String> futureHash = executorService.submit(miningTask);
+
+        try {
+            String blockHash = futureHash.get(60, TimeUnit.SECONDS);
+            newBlock.setHash(blockHash);
+            insertBlockIntoDatabase(newBlock);
+        } catch (Exception e) {
+            System.out.println("Mining interrupted or timed out: " + e.getMessage());
+        }
+    }
+
+    public void simulateAddMultipleProductsConcurrently(int numberOfProducts) throws SQLException {
+        for (int i = 0; i < numberOfProducts; i++) {
+            String blockId = "Product" + i;
+            String title = "Title" + i;
+            double price = 10.0 * i; // Sample price
+            String description = "Description for product " + i;
+            String category = "Category" + i;
+
+            String previousHash = getLastBlockHash();
+            long timeStamp = System.currentTimeMillis();
+            Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
+
+            executorService.submit(() -> {
+                try {
+                    mineBlockConcurrently(newBlock);
+                    insertBlockIntoDatabase(newBlock);
+                    System.out.println("Product with ID " + newBlock.getBlockId() + " has been added to the database.");
+                } catch (SQLException e) {
+                    System.out.println("Error inserting block into database: " + e.getMessage());
+                }
+            });
+        }
+    }
 
     private void searchForProduct() {
         Scanner scanner = new Scanner(System.in);

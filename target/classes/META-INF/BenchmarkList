@@ -1,0 +1,3 @@
+JMH S 35 com.eap.plh24.BlockchainV1Benchmark S 86 com.eap.plh24.jmh_generated.BlockchainV1Benchmark_addMultipleProductsBenchmark_jmhTest S 28 addMultipleProductsBenchmark S 11 AverageTime E A 1 1 1 E I 1 1 E E I 1 4 E E I 1 2 E E E E E E U 12 MILLISECONDS E E 
+JMH S 35 com.eap.plh24.BlockchainV1Benchmark S 77 com.eap.plh24.jmh_generated.BlockchainV1Benchmark_addProductBenchmark_jmhTest S 19 addProductBenchmark S 11 AverageTime E A 1 1 1 E I 1 1 E E I 1 4 E E I 1 2 E E E E E E U 12 MILLISECONDS E E 
+JMH S 35 com.eap.plh24.BlockchainV2Benchmark S 86 com.eap.plh24.jmh_generated.BlockchainV2Benchmark_addMultipleProductsBenchmark_jmhTest S 28 addMultipleProductsBenchmark S 11 AverageTime E A 1 1 1 E I 1 1 E E I 1 4 E E I 1 2 E E E E E E U 12 MILLISECONDS E E 

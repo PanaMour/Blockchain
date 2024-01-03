@@ -356,6 +356,32 @@ public class BlockchainV3 {
             System.out.println("Error closing the database connection: " + e.getMessage());
         }
     }
+    public void simulateAddProduct(String title, String category, String description, double price) throws SQLException {
+        String blockId = "Block" + Math.random();
+        String previousHash = getLastBlockHash();
+        long timeStamp = System.currentTimeMillis();
+        Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
+
+        newBlock.mineBlock(1);
+        System.out.println("Simulated adding block with ID: " + blockId);
+    }
+
+    public void simulateAddMultipleProductsConcurrently(int numberOfProducts) {
+        for (int i = 0; i < numberOfProducts; i++) {
+            String blockId = "Prod" + i; // Mock block ID
+            String title = "Product" + i; // Mock title
+            String description = "Description for Product" + i; // Mock description
+            double price = 10.0 + i; // Mock price
+            Thread thread = new Thread(() -> {
+                try {
+                    simulateAddProduct(blockId, title, description, price);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            });
+            thread.start();
+        }
+    }
 
     public static void main(String[] args) {
         BlockchainV3 app = new BlockchainV3();
