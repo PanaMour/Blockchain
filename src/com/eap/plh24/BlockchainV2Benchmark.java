@@ -5,6 +5,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -21,11 +22,16 @@ public class BlockchainV2Benchmark {
     public void setUp() {
         blockchainV2 = new BlockchainV2();
     }
-    public void addProductBenchmark() throws SQLException {
+
+    @Benchmark
+    @Threads(4)
+    public void simulateAddProduct() throws SQLException {
         blockchainV2.simulateAddProduct("Pear", "Fruit", "Delicious pear", 2.99);
     }
+
     @Benchmark
-    public void addMultipleProductsBenchmark() throws SQLException {
+    @Threads(5)
+    public void simulateAddMultipleProductsConcurrently() throws SQLException {
         blockchainV2.simulateAddMultipleProductsConcurrently(5);
     }
 

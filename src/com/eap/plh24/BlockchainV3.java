@@ -363,7 +363,6 @@ public class BlockchainV3 {
         Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
 
         newBlock.mineBlock(1);
-        System.out.println("Simulated adding block with ID: " + blockId);
     }
 
     public void simulateAddMultipleProductsConcurrently(int numberOfProducts) {

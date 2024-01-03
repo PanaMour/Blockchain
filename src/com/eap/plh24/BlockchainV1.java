@@ -197,11 +197,11 @@ public class BlockchainV1 {
         Random random = new Random();
         for (int i = 0; i < numberOfProducts; i++) {
             // Random data for each product
-            String blockId = "block" + (i + 1); // Sequential block ID
+            String blockId = "block" + (i + 1);
             String title = "Product " + (i + 1);
-            double price = 100.0 + (random.nextDouble() * 100.0); // Random price between 100 and 200
+            double price = 100.0 + (random.nextDouble() * 100.0);
             String description = "Description for product " + (i + 1);
-            String category = "Category" + (i % 3); // Cycles through 3 categories
+            String category = "Category" + (i % 3);
 
             simulateAddProduct(title, category, description, price);
         }
@@ -275,7 +275,6 @@ public class BlockchainV1 {
             }
 
             while (rs.next()) {
-                // Display each block's details
                 System.out.println("Registration Number: " + rs.getInt("registration_number"));
                 System.out.println("Block ID: " + rs.getString("block_id"));
                 System.out.println("Title: " + rs.getString("title"));

@@ -264,10 +264,10 @@ public class BlockchainV2 {
     }
 
     public void simulateAddMultipleProductsConcurrently(int numberOfProducts) throws SQLException {
-        for (int i = 0; i < numberOfProducts; i++) {
+        for (int i = 1; i < numberOfProducts+1; i++) {
             String blockId = "Product" + i;
             String title = "Title" + i;
-            double price = 10.0 * i; // Sample price
+            double price = 10.0 * i;
             String description = "Description for product " + i;
             String category = "Category" + i;
 
@@ -276,8 +276,8 @@ public class BlockchainV2 {
             Block newBlock = new Block(blockId, title, timeStamp, price, description, category, previousHash);
 
             executorService.submit(() -> {
+                mineBlockConcurrently(newBlock);
                 try {
-                    mineBlockConcurrently(newBlock);
                     insertBlockIntoDatabase(newBlock);
                     System.out.println("Product with ID " + newBlock.getBlockId() + " has been added to the database.");
                 } catch (SQLException e) {
